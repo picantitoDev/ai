@@ -68,5 +68,7 @@ def predict():
         flash('Invalid file type. Please upload a PNG or JPG image.')
         return redirect(request.url)
 
+# 👇 This part is what makes it work on Render
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
