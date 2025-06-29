@@ -1,130 +1,211 @@
-import os
-import numpy as np
+# ===== app.py =====
+from flask import Flask, render_template, request, flash, redirect, url_for
 import tensorflow as tf
-import base64
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
-from werkzeug.utils import secure_filename
+from tensorflow.keras.models import load_model
 from PIL import Image
-from datetime import datetime
+import numpy as np
+import os
+from werkzeug.utils import secure_filename
+import logging
 
-# Configuración
-UPLOAD_FOLDER = os.path.join('static', 'preview')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
+# Configuración de la aplicación Flask
 app = Flask(__name__)
+app.secret_key = 'tu_clave_secreta_aqui'  # Cambia por una clave segura en producción
+
+# Configuración de directorios
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.secret_key = 'supersecretkey'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Límite de 16MB
 
-# Crear carpeta si no existe
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# Crear directorio de uploads si no existe
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Cargar modelo
-model_path = os.path.join(os.path.dirname(__file__), 'model', 'parkinson_disease_detection.h5')
-model = tf.keras.models.load_model(model_path)
+# Configurar logging para debug
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Helper function to convert image to base64
-def image_to_base64(image_path):
+# Variables globales para el modelo
+modelo = None
+IMG_SIZE = (224, 224)  # Tamaño esperado por el modelo
+CLASES = ['Healthy', 'Parkinson']  # Basado en tu código original
+
+def cargar_modelo():
+    """
+    Carga el modelo CNN entrenado desde el archivo .h5
+    """
+    global modelo
     try:
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode('utf-8')
+        modelo_path = 'src/model/modelov3.keras'  
+        if os.path.exists(modelo_path):
+            modelo = load_model(modelo_path)
+            logger.info(f"Modelo cargado exitosamente desde {modelo_path}")
+            logger.info(f"Forma de entrada esperada: {modelo.input_shape}")
+        else:
+            logger.error(f"No se encontró el archivo del modelo: {modelo_path}")
+            return False
     except Exception as e:
-        print(f"Error converting image to base64: {e}")
+        logger.error(f"Error al cargar el modelo: {str(e)}")
+        return False
+    return True
+
+def archivo_permitido(filename):
+    """
+    Verifica si el archivo tiene una extensión permitida
+    """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def preprocesar_imagen(imagen_path):
+    """
+    Preprocesa la imagen para que sea compatible con el modelo:
+    - Redimensiona a (128, 128)
+    - Convierte a RGB
+    - Normaliza valores entre 0 y 1
+    - Agrega dimensión de batch
+    """
+    try:
+        # Abrir y convertir imagen
+        img = Image.open(imagen_path)
+        
+        # Convertir a RGB (asegurar 3 canales)
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # Redimensionar a tamaño esperado por el modelo
+        img = img.resize(IMG_SIZE)
+        
+        # Convertir a array numpy
+        img_array = np.array(img)
+        
+        # Normalizar valores entre 0 y 1
+        img_array = img_array.astype(np.float32) / 255.0
+        
+        # Agregar dimensión de batch (1, 128, 128, 3)
+        img_array = np.expand_dims(img_array, axis=0)
+        
+        logger.info(f"Imagen preprocesada - Shape: {img_array.shape}")
+        return img_array
+        
+    except Exception as e:
+        logger.error(f"Error al preprocesar imagen: {str(e)}")
         return None
 
-# Route to serve uploaded files
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-# Extensiones permitidas
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# FIXED: Separate preprocess_image function
-def preprocess_image(image_path):
-    img = Image.open(image_path).convert('L')  # Escala de grises
-    img = img.resize((128, 128))
-    img_array = np.array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=-1)  # canal
-    img_array = np.expand_dims(img_array, axis=0)   # batch
-    return img_array
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/reset')
-def reset():
-    session.clear()
-    return redirect(url_for('index'))
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(url_for('index'))
+def clasificar_imagen(imagen_path):
+    """
+    Realiza la clasificación de la imagen usando el modelo cargado
+    """
+    global modelo
     
-    file = request.files['file']
-    if file.filename == '':
-        flash('No selected file')
-        return redirect(url_for('index'))
-    
-    if file and allowed_file(file.filename):
-        # Create unique filename to avoid conflicts
-        timestamp = str(int(datetime.now().timestamp()))
-        filename = f"{timestamp}_{secure_filename(file.filename)}"
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        
-        print("Imagen guardada en:", filepath)
-        print("Archivo existe:", os.path.exists(filepath))
-        
-        # Store only filename and timestamp in session (no base64 to avoid session size limits)
-        session['filename'] = filename
-        session['timestamp'] = datetime.now().timestamp()
-        
-        return render_template('index.html',
-                               uploaded=True,
-                               filename=filename,
-                               image_base64=None,  # Don't pass base64 to avoid session bloat
-                               timestamp=session['timestamp'])
-    else:
-        flash('Invalid file type. Please upload a PNG or JPG image.')
-        return redirect(url_for('index'))
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    filename = session.get('filename')
-    if not filename:
-        flash('No image uploaded. Please upload an image first.')
-        return redirect(url_for('index'))
-    
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    
-    if not os.path.exists(filepath):
-        flash('Image file not found. Please upload again.')
-        return redirect(url_for('index'))
+    if modelo is None:
+        return None, "Modelo no cargado"
     
     try:
-        # Predecir
-        image = preprocess_image(filepath)
-        prediction = model.predict(image)
-        predicted_class = np.argmax(prediction, axis=1)[0]
-        confidence = float(np.max(prediction))
-        label = "Parkinson" if predicted_class == 1 else "Healthy"
+        # Preprocesar imagen
+        img_array = preprocesar_imagen(imagen_path)
+        if img_array is None:
+            return None, "Error al preprocesar la imagen"
         
-        return render_template('index.html',
-                               uploaded=True,
-                               filename=filename,
-                               image_base64=None,  # Don't use base64 to avoid session size issues
-                               timestamp=session.get('timestamp'),
-                               prediction=label,
-                               confidence=round(confidence * 100, 2))
+        # Realizar predicción
+        prediccion = modelo.predict(img_array, verbose=0)
+        
+        # Interpretar resultado (asumiendo clasificación binaria con sigmoid)
+        if len(prediccion.shape) > 1 and prediccion.shape[1] == 1:
+            # Salida sigmoid (0-1)
+            confianza = float(prediccion[0][0])
+            if confianza > 0.5:
+                clase_predicha = CLASES[1]  # Parkinson
+                porcentaje_confianza = confianza * 100
+            else:
+                clase_predicha = CLASES[0]  # Healthy
+                porcentaje_confianza = (1 - confianza) * 100
+        else:
+            # Salida softmax o múltiples clases
+            clase_idx = np.argmax(prediccion[0])
+            clase_predicha = CLASES[clase_idx]
+            porcentaje_confianza = float(np.max(prediccion[0])) * 100
+        
+        resultado = {
+            'clase': clase_predicha,
+            'confianza': round(porcentaje_confianza, 2),
+            'prediccion_raw': float(prediccion[0][0]) if len(prediccion.shape) > 1 and prediccion.shape[1] == 1 else prediccion[0].tolist()
+        }
+        
+        logger.info(f"Clasificación exitosa: {resultado}")
+        return resultado, None
+        
     except Exception as e:
-        print(f"Error during prediction: {e}")
-        flash('Error processing image. Please try again.')
-        return redirect(url_for('index'))
+        error_msg = f"Error en la clasificación: {str(e)}"
+        logger.error(error_msg)
+        return None, error_msg
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    """
+    Ruta principal que maneja tanto la visualización como el procesamiento
+    """
+    if request.method == 'POST':
+        # Verificar si se subió un archivo
+        if 'archivo' not in request.files:
+            flash('No se seleccionó ningún archivo', 'error')
+            return redirect(request.url)
+        
+        archivo = request.files['archivo']
+        
+        # Verificar si se seleccionó un archivo
+        if archivo.filename == '':
+            flash('No se seleccionó ningún archivo', 'error')
+            return redirect(request.url)
+        
+        # Procesar archivo si es válido
+        if archivo and archivo_permitido(archivo.filename):
+            try:
+                # Guardar archivo de forma segura
+                filename = secure_filename(archivo.filename)
+                timestamp = str(int(np.random.rand() * 1000000))  # Evitar colisiones de nombres
+                filename = f"{timestamp}_{filename}"
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                archivo.save(filepath)
+                
+                # Realizar clasificación
+                resultado, error = clasificar_imagen(filepath)
+                
+                if error:
+                    flash(f'Error al procesar la imagen: {error}', 'error')
+                    return render_template('index.html')
+                
+                # Mostrar resultado
+                return render_template('index.html', 
+                                     resultado=resultado, 
+                                     imagen_url=f'uploads/{filename}')
+                                     
+            except Exception as e:
+                flash(f'Error al procesar el archivo: {str(e)}', 'error')
+                return redirect(request.url)
+        else:
+            flash('Tipo de archivo no permitido. Use: PNG, JPG, JPEG, GIF, BMP', 'error')
+            return redirect(request.url)
+    
+    # GET request - mostrar formulario
+    return render_template('index.html')
+
+@app.errorhandler(413)
+def archivo_muy_grande(error):
+    """Manejo de archivos demasiado grandes"""
+    flash('El archivo es demasiado grande. Máximo 16MB permitido.', 'error')
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Cargar modelo al iniciar la aplicación
+    if not cargar_modelo():
+        print("❌ Error: No se pudo cargar el modelo. Verifica que el archivo 'modelo_cnn.h5' existe.")
+        print("   El archivo debe estar en la raíz del proyecto.")
+        exit(1)
+    
+    print("✅ Modelo cargado exitosamente")
+    print("🚀 Iniciando aplicación Flask...")
+    print("   Accede a: http://localhost:5000")
+    
+    # Ejecutar aplicación
+    app.run(debug=True, host='0.0.0.0', port=5000)
