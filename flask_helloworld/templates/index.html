@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parkinson Detection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="file"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-predict {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+            margin-top: 20px;
+        }
+        
+        .btn-predict:hover {
+            box-shadow: 0 6px 20px rgba(40,167,69,0.4);
+        }
+        
+        .btn-new {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            box-shadow: 0 4px 15px rgba(108,117,125,0.3);
+            margin-top: 15px;
+        }
+        
+        .image-preview {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .image-preview img:hover {
+            transform: scale(1.02);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 15px;
+            animation: fadeIn 0.5s ease-in-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .result.healthy {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+        
+        .result.parkinson {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+        
+        .confidence {
+            font-size: 18px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+        
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+        
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            position: relative;
+        }
+        
+        .step.active {
+            background: #007bff;
+            box-shadow: 0 0 20px rgba(0,123,255,0.5);
+        }
+        
+        .step.completed {
+            background: #28a745;
+        }
+        
+        .step.inactive {
+            background: #6c757d;
+        }
+        
+        .step-label {
+            position: absolute;
+            top: 50px;
+            font-size: 12px;
+            font-weight: normal;
+            color: #666;
+            white-space: nowrap;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .result {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Parkinson Disease Detection</h1>
+        
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step {% if not uploaded %}active{% else %}completed{% endif %}">
+                1
+                <div class="step-label">Upload Image</div>
+            </div>
+            <div class="step {% if uploaded and not prediction %}active{% elif prediction %}completed{% else %}inactive{% endif %}">
+                2
+                <div class="step-label">Predict</div>
+            </div>
+            <div class="step {% if prediction %}active{% else %}inactive{% endif %}">
+                3
+                <div class="step-label">Results</div>
+            </div>
+        </div>
+
+        {% if not uploaded %}
+            <!-- Step 1: Upload Image -->
+            <div class="upload-section">
+                <h3>📁 Upload Medical Image</h3>
+                <p>Please upload a medical image for Parkinson's disease detection</p>
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <div class="file-input-wrapper">
+                        <input type="file" name="file" accept="image/*" required>
+                    </div>
+                    <br>
+                    <button type="submit" class="btn">Upload Image</button>
+                </form>
+            </div>
+        {% else %}
+            <!-- Step 2: Show Image and Predict Button -->
+            <div class="image-preview">
+                <h3>📷 Uploaded Image</h3>
+                
+                <!-- Use static file serving instead of base64 -->
+                <img src="{{ url_for('uploaded_file', filename=filename) }}?t={{ timestamp }}" 
+                     alt="Uploaded Medical Image"
+                     style="max-width: 100%; max-height: 400px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"
+                     onerror="handleImageError(this)">
+                
+                {% if not prediction %}
+                    <form action="/predict" method="POST">
+                        <button type="submit" class="btn btn-predict">🔍 Analyze Image</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            {% if prediction %}
+                <!-- Step 3: Show Results -->
+                <div class="result {% if prediction == 'Healthy' %}healthy{% else %}parkinson{% endif %}">
+                    <div>
+                        {% if prediction == 'Healthy' %}
+                            ✅ Prediction: {{ prediction }}
+                        {% else %}
+                            ⚠️ Prediction: {{ prediction }}
+                        {% endif %}
+                    </div>
+                    <div class="confidence">
+                        📊 Confidence: {{ confidence }}%
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('reset') }}">
+                  <button class="btn btn-new">🔄 Analyze New Image</button>
+              </a>
+            {% endif %}
+        {% endif %}
+
+        <!-- Error Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="error">
+                    {% for message in messages %}
+                        ❌ {{ message }}<br>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <script>
+        function handleImageError(img) {
+            // Try alternative route first
+            if (!img.dataset.tried) {
+                img.dataset.tried = 'true';
+                {% if filename and timestamp %}
+                img.src = '{{ url_for("static", filename="preview/" + filename) }}?t={{ timestamp }}';
+                {% else %}
+                img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBub3QgZm91bmQ8L3RleHQ+PC9zdmc+';
+                {% endif %}
+            } else {
+                // Show placeholder image
+                img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBub3QgZm91bmQ8L3RleHQ+PC9zdmc+';
+                img.alt = 'Image could not be loaded';
+            }
+        }
+    </script>
+</body>
+</html>
