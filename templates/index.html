@@ -1,17 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Predicción Parkinson</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detección de Parkinson</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Sube una imagen para predecir</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" accept=".png,.jpg,.jpeg" required>
-        <input type="submit" value="Predecir">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center text-purple-700">Detección de Parkinson</h1>
+    
+    <form method="POST" enctype="multipart/form-data" class="flex flex-col space-y-4">
+      <input type="file" name="imagen" accept="image/*" required class="border p-2 rounded">
+      <button type="submit" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700">Subir y Predecir</button>
     </form>
-    {% if prediction %}
-        <h2>Resultado:</h2>
-        <pre>{{ prediction }}</pre>
+
+    {% if resultado %}
+    <div class="mt-6 text-center">
+      <p class="text-lg font-semibold">Resultado: <span class="text-purple-700">{{ resultado }}</span></p>
+      <p class="text-sm text-gray-600 mb-4">Probabilidad: {{ prob }}%</p>
+      <img src="{{ url_for('static', filename='uploads/' + imagen) }}" class="mx-auto max-h-64 rounded border shadow">
+    </div>
     {% endif %}
+  </div>
 </body>
 </html>
