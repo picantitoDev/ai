@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predicción Parkinson</title>
+</head>
+<body>
+    <h1>Sube una imagen para predecir</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" accept=".png,.jpg,.jpeg" required>
+        <input type="submit" value="Predecir">
+    </form>
+    {% if prediction %}
+        <h2>Resultado:</h2>
+        <pre>{{ prediction }}</pre>
+    {% endif %}
+</body>
+</html>

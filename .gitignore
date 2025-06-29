@@ -16,3 +16,4 @@ venv/
 # Flask instance folder (if used)
 instance/
 venv/
+venv310/
