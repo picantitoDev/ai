@@ -96,6 +96,12 @@
       color: #dc2626;
     }
 
+    .result-warning {
+      background-color: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #d97706;
+    }
+
     .result-success {
       background-color: #f0fdf4;
       border: 1px solid #bbf7d0;
@@ -130,9 +136,26 @@
         <div class="image-caption">Imagen cargada</div>
       </div>
 
-      <div class="result-container {% if resultado|lower == 'parkinson' %}result-error{% else %}result-success{% endif %}">
-        {% if resultado|lower == 'parkinson' %}
-          🧠 Probabilidad de Parkinson detectada: {{ prob }}%
+      {% set p = prob|float %}
+      <div class="result-container 
+        {% if p > 90 %}
+          result-error
+        {% elif p > 70 %}
+          result-error
+        {% elif p > 50 %}
+          result-warning
+        {% else %}
+          result-success
+        {% endif %}
+      ">
+        {% if p > 90 %}
+          🧠⚠️ Muy alta probabilidad de Parkinson: {{ prob }}%
+        {% elif p > 70 %}
+          🧠 Alta probabilidad de Parkinson: {{ prob }}%
+        {% elif p > 50 %}
+          ❗🧠 Riesgo moderado: {{ prob }}%. Se recomienda evaluación médica.
+        {% elif p > 30 %}
+          ✅🧪 Posiblemente saludable: {{ prob }}%
         {% else %}
           ✅ Imagen saludable detectada: {{ prob }}%
         {% endif %}
