@@ -104,7 +104,7 @@ mkdir -p static/uploads
 
 5. **Ejecutar la aplicación**
 ```bash
-python aplicacion.py
+python app.py
 ```
 
 La aplicación estará disponible en `http://localhost:5000`
@@ -152,7 +152,7 @@ docker run -p 5000:5000 parkinson-detector
 ```
 proyecto-parkinson/
 ├── 📄 README.md                 # Documentación principal
-├── 🐍 aplicacion.py             # Aplicación Flask principal
+├── 🐍 app.py             # Aplicación Flask principal
 ├── 🧠 modelov6.h5              # Modelo entrenado de TensorFlow
 ├── 📋 requisitos.txt           # Dependencias de Python
 ├── 🐳 Dockerfile               # Configuración de contenedor
@@ -165,7 +165,7 @@ proyecto-parkinson/
 
 ### Componentes Principales
 
-#### `aplicacion.py`
+#### `app.py`
 Aplicación Flask que maneja:
 - Carga y procesamiento de imágenes
 - Inferencia del modelo neuronal
@@ -256,6 +256,10 @@ callbacks = [
 ```
 
 ## 🔬 Desarrollo en Google Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18W2KbdZMAz3q5c0Y3wW1g9l0HvNMvv1-?usp=sharing)
+
+> **Accede al notebook completo de entrenamiento y desarrollo del modelo directamente en Google Colab**
 
 El modelo fue desarrollado y entrenado completamente en **Google Colab**, aprovechando:
 
@@ -418,7 +422,7 @@ git clone https://github.com/usuario/proyecto-parkinson.git
 pip3 install -r requisitos.txt
 
 # 5. Ejecutar la aplicación
-python3 aplicacion.py
+python3 app.py
 ```
 
 ### Plataformas de Despliegue Alternativas
