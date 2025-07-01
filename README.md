@@ -513,7 +513,7 @@ Este proyecto es un trabajo académico desarrollado en la **Universidad Privada 
 
 | Estudiante | Código |
 |------------|--------|
-| **ALCÁNTARA RODRÍGUEZ, PIERO ARTURO** | - |
+| **ALCÁNTARA RODRÍGUEZ, PIERO ARTURO** | 000268459 |
 | **AREVALO ESPINOZA, RAMDHUM** | - |
 | **BAUTISTA REYES, LOURDES YOLANDA** | - |
 | **DAVALOS ALFARO, MARISELLA LISSET** | - |
