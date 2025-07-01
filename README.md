@@ -528,5 +528,3 @@ Este proyecto es un trabajo académico desarrollado en la **Universidad Privada 
 - **MENDOZA CORPUS, CARLOS ALFREDO**
 
 ---
-
-**¿Te gusta este proyecto? ⭐ ¡Dale una estrella en GitHub!**
