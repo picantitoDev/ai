@@ -188,15 +188,39 @@ Interfaz de usuario con:
 
 ### Arquitectura del Modelo
 
-El modelo `modelov6.h5` implementa una **Red Neuronal Convolucional (CNN)** optimizada para el análisis de patrones gráficos:
+El modelo `modelov6.h5` implementa una **Red Neuronal Convolucional basada en Transfer Learning** con MobileNetV2 como backbone:
 
 ```python
-# Configuración del modelo
-- Capas de entrada: 224x224x3 (RGB)
-- Capas convolucionales: Extracción de características
-- Capas de pooling: Reducción dimensional
-- Capas densas: Clasificación final
-- Función de activación: Sigmoid (clasificación binaria)
+# Arquitectura del modelo
+- Base Model: MobileNetV2 preentrenado (ImageNet)  
+- Input Shape: 224x224x3 (RGB)
+- GlobalAveragePooling2D: Reducción dimensional
+- Dense Layer: 128 neuronas con activación ReLU
+- Dropout: 50% para regularización
+- Output Layer: 1 neurona con activación Sigmoid (clasificación binaria)
+- Optimizer: Adam (learning_rate=0.0001)
+- Loss Function: Binary Crossentropy
+```
+
+### Dataset y Preprocesamiento
+
+**Fuente de Datos**: Kaggle - "Handwritten Parkinson's Disease Augmented Data"
+
+**División del Dataset**:
+- **Entrenamiento**: 70% de las imágenes
+- **Validación**: 15% de las imágenes  
+- **Prueba**: 15% de las imágenes
+
+**Técnicas de Augmentación**:
+```python
+train_datagen = ImageDataGenerator(
+    rescale=1./255,           # Normalización [0,1]
+    rotation_range=15,        # Rotación hasta 15°
+    zoom_range=0.1,          # Zoom hasta 10%
+    width_shift_range=0.1,   # Desplazamiento horizontal
+    height_shift_range=0.1,  # Desplazamiento vertical
+    horizontal_flip=True     # Volteo horizontal
+)
 ```
 
 ### Preprocesamiento de Imágenes
@@ -204,8 +228,8 @@ El modelo `modelov6.h5` implementa una **Red Neuronal Convolucional (CNN)** opti
 ```python
 def predecir_imagen(ruta_imagen):
     img = cv2.imread(ruta_imagen)           # Cargar imagen
-    img = cv2.resize(img, (224, 224))       # Redimensionar
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convertir a RGB
+    img = cv2.resize(img, (224, 224))       # Redimensionar a 224x224
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convertir BGR a RGB
     img = img / 255.0                       # Normalizar [0,1]
     img = np.expand_dims(img, axis=0)       # Añadir dimensión batch
     return modelo.predict(img)[0][0]        # Predicción
@@ -213,30 +237,119 @@ def predecir_imagen(ruta_imagen):
 
 ### Métricas de Evaluación
 
-- **Precisión**: Porcentaje de predicciones correctas
-- **Sensibilidad**: Capacidad de detectar casos positivos
-- **Especificidad**: Capacidad de identificar casos negativos
-- **F1-Score**: Media armónica entre precisión y recall
+El modelo fue evaluado con las siguientes métricas médicas:
+
+- **Accuracy**: Porcentaje de predicciones correctas
+- **Precision**: Proporción de verdaderos positivos entre predicciones positivas
+- **Sensibilidad (Recall)**: Capacidad de detectar casos positivos reales
+- **F1-Score**: Media armónica entre precision y recall
+- **AUC-ROC**: Área bajo la curva ROC para evaluar discriminación
+
+### Regularización y Control de Entrenamiento
+
+```python
+callbacks = [
+    EarlyStopping(patience=10, restore_best_weights=True),
+    ReduceLROnPlateau(patience=3, factor=0.5, min_lr=1e-6),
+    ModelCheckpoint("modelo_transfer_parkinson.h5", save_best_only=True)
+]
+```
 
 ## 🔬 Desarrollo en Google Colab
 
 El modelo fue desarrollado y entrenado completamente en **Google Colab**, aprovechando:
 
-- **GPU gratuita**: Aceleración del entrenamiento
-- **Entorno preconfigurado**: TensorFlow y dependencias instaladas
-- **Almacenamiento en la nube**: Google Drive integration
+- **GPU gratuita**: Aceleración del entrenamiento con CUDA
+- **Entorno preconfigurado**: TensorFlow 2.x y dependencias ML
+- **Almacenamiento en la nube**: Integración con Google Drive
 - **Notebooks interactivos**: Documentación y código unificados
 
-### Proceso de Entrenamiento
+### Proceso de Desarrollo Completo
 
-1. **Preparación de datos**: Carga y limpieza del dataset
-2. **Augmentación**: Técnicas de aumento de datos
-3. **División**: Train/Validation/Test splits
-4. **Entrenamiento**: Optimización de hiperparámetros
-5. **Evaluación**: Métricas de rendimiento
-6. **Exportación**: Guardado del modelo final
+#### **Sección 1: Configuración e Importación de Datos**
+```python
+# Instalación de dependencias
+!pip install kaggle tensorflow pandas numpy matplotlib seaborn scikit-learn opencv-python
 
-*Nota: El notebook de Colab con el código completo estará disponible próximamente.*
+# Configuración API Kaggle y descarga del dataset
+!kaggle datasets download -d banilkumar20phd7071/handwritten-parkinsons-disease-augmented-data
+```
+
+#### **Sección 2: Análisis Exploratorio de Datos (EDA)**
+- Visualización de distribución de clases (Healthy vs Parkinson)
+- Análisis de dimensiones de imágenes
+- Muestreo aleatorio para inspección visual
+- Estadísticas descriptivas del dataset
+
+#### **Sección 3: Preprocesamiento y Organización**
+```python
+# División del dataset
+split_ratios = [0.7, 0.15, 0.15]  # train/val/test
+IMG_SIZE = (224, 224)
+BATCH_SIZE = 32
+
+# Generadores con augmentación
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=15,
+    zoom_range=0.1,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    horizontal_flip=True
+)
+```
+
+#### **Sección 4: Arquitectura y Entrenamiento**
+```python
+# Transfer Learning con MobileNetV2
+base_model = MobileNetV2(weights='imagenet', include_top=False)
+base_model.trainable = False
+
+# Cabeza personalizada
+x = GlobalAveragePooling2D()(base_model.output)
+x = Dense(128, activation='relu')(x)
+x = Dropout(0.5)(x)
+output = Dense(1, activation='sigmoid')(x)
+
+# Entrenamiento con callbacks
+callbacks = [
+    EarlyStopping(patience=10, restore_best_weights=True),
+    ReduceLROnPlateau(patience=3, factor=0.5),
+    ModelCheckpoint("modelo_transfer_parkinson.h5", save_best_only=True)
+]
+```
+
+#### **Sección 5: Evaluación Exhaustiva**
+- Matriz de confusión con visualización
+- Métricas médicas (Precision, Recall, F1-Score, AUC-ROC)
+- Curva ROC para análisis de discriminación
+- Classification report detallado
+
+#### **Sección 6: Pruebas en Tiempo Real**
+- Carga de imágenes desde local
+- Preprocesamiento automático
+- Predicción con interpretación de confianza
+- Visualización de resultados
+
+### Configuración del Entorno
+
+```python
+# Configuración de GPU
+import tensorflow as tf
+print("GPUs disponibles:", tf.config.list_physical_devices('GPU'))
+
+# Montaje de Google Drive para persistencia
+from google.colab import drive
+drive.mount('/content/drive')
+```
+
+### Dataset Utilizado
+
+- **Fuente**: Kaggle - "Handwritten Parkinson's Disease Augmented Data"  
+- **Autor**: banilkumar20phd7071
+- **Clases**: Healthy, Parkinson
+- **Formato**: Imágenes RGB de trazos de espirales y ondas
+- **Preprocesamiento**: Normalización, redimensionamiento, augmentación
 
 ## 🐳 Dockerización
 
@@ -270,12 +383,50 @@ docker logs <container_id>
 
 ## 🌐 Despliegue
 
-### Plataformas de Despliegue
+### Despliegue en AWS EC2
+
+La aplicación está desplegada en **Amazon Web Services EC2**, proporcionando:
+
+- **Alta disponibilidad**: Instancia EC2 con uptime garantizado
+- **Escalabilidad**: Capacidad de escalar recursos según demanda  
+- **Seguridad**: Grupos de seguridad y configuración SSL
+- **Rendimiento**: Optimización para inferencia en tiempo real
+
+### Configuración de EC2
+
+```bash
+# Configuración del servidor
+Instance Type: t2.micro (Free tier eligible)
+Operating System: Ubuntu 20.04 LTS
+Security Groups: HTTP (80), HTTPS (443), SSH (22)
+Storage: 8GB EBS
+```
+
+### Proceso de Despliegue
+
+```bash
+# 1. Conectar a la instancia EC2
+ssh -i keypair.pem ubuntu@ec2-instance-ip
+
+# 2. Instalar dependencias del sistema
+sudo apt update && sudo apt install python3-pip
+
+# 3. Clonar el repositorio
+git clone https://github.com/usuario/proyecto-parkinson.git
+
+# 4. Instalar dependencias Python
+pip3 install -r requisitos.txt
+
+# 5. Ejecutar la aplicación
+python3 aplicacion.py
+```
+
+### Plataformas de Despliegue Alternativas
 
 - **Heroku**: Despliegue gratuito con Git
-- **AWS EC2**: Instancias escalables
 - **Google Cloud Run**: Serverless containers
 - **Azure Container Instances**: Contenedores en la nube
+- **DigitalOcean**: VPS económicos
 
 ### Variables de Entorno
 
@@ -285,9 +436,7 @@ export FLASK_APP=aplicacion.py
 export PORT=5000
 ```
 
-### URL de la Aplicación
-
-🌍 **Aplicación Desplegada**: [Próximamente]
+### 🌍 **Aplicación Desplegada**: [URL disponible tras despliegue en EC2]
 
 ## 🤝 Contribuciones
 
@@ -335,34 +484,44 @@ Este proyecto tiene fines:
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo la **Licencia MIT** - ver el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto es un trabajo académico desarrollado en la **Universidad Privada Antenor Orrego** para el curso de **Inteligencia Artificial: Principios y Técnicas**.
 
-```
-MIT License
+### 🎓 **Propósito Académico**
+- Proyecto educativo sin fines comerciales
+- Desarrollo de competencias en Machine Learning
+- Aplicación práctica de técnicas de IA en salud
+- Contribución al conocimiento en neurología computacional
 
-Copyright (c) 2025 [Tu Nombre]
-
-Se concede permiso, de forma gratuita, a cualquier persona que obtenga una copia
-de este software y archivos de documentación asociados...
-```
-
----
-
-## 📞 Contacto y Soporte
-
-- **Desarrollador**: [Tu Nombre]
-- **Email**: [tu-email@ejemplo.com]
-- **LinkedIn**: [Tu perfil de LinkedIn]
-- **Issues**: [GitHub Issues](https://github.com/tu-usuario/proyecto-parkinson/issues)
+### 📋 **Términos de Uso**
+- El código fuente es de libre consulta para fines educativos
+- Se requiere atribución al equipo de desarrollo y universidad
+- No se permite uso comercial sin autorización expresa
+- El proyecto es de naturaleza investigativa y educativa
 
 ---
 
-### 🙏 Agradecimientos
+## 📚 Información Académica
 
-- Comunidad de TensorFlow y Keras
-- Google Colab por el entorno de desarrollo
-- Comunidad médica y de investigación en Parkinson
-- Contribuidores de código abierto
+### 🏛️ **Universidad Privada Antenor Orrego**
+**Escuela de Ingeniería de Sistemas e Inteligencia Artificial**
+
+### 👨‍🎓 **Equipo de Desarrollo**
+
+| Estudiante | Código |
+|------------|--------|
+| **ALCÁNTARA RODRÍGUEZ, PIERO ARTURO** | - |
+| **AREVALO ESPINOZA, RAMDHUM** | - |
+| **BAUTISTA REYES, LOURDES YOLANDA** | - |
+| **DAVALOS ALFARO, MARISELLA LISSET** | - |
+| **LEYVA VALQUI, GABRIEL ADOLFO** | - |
+| **RODRIGUEZ GONZALES, ALEJANDRO VALENTINO** | - |
+
+### 📖 **Curso Académico**
+**INTELIGENCIA ARTIFICIAL: PRINCIPIOS Y TÉCNICAS**
+
+### 👨‍🏫 **Docentes**
+- **SAGASTEGUI CHIGNE, TEOBALDO HERNAN**
+- **MENDOZA CORPUS, CARLOS ALFREDO**
 
 ---
 
