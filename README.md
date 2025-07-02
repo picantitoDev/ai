@@ -58,13 +58,12 @@ La enfermedad de Parkinson afecta el control motor fino, manifestándose en alte
 - **OpenCV**: Procesamiento de imágenes y visión computacional
 - **NumPy**: Computación numérica y manejo de arrays
 - **Flask**: Framework web para la aplicación
+- **Werkzeug**: Utilidades WSGI para manejo seguro de archivos
 
 ### Frontend
 - **HTML5**: Estructura de la interfaz
 - **CSS3**: Estilos y diseño responsivo
-- **Jinja2**: Motor de plantillas de Python para renderizado dinámico
-- **Flask**: Framework web ligero para Python
-- **Werkzeug**: Utilidades WSGI para manejo seguro de archivos
+- **Jinja2**: Motor de plantillas para renderizado dinámico de contenido
 
 ### Desarrollo y Despliegue
 - **Google Colab**: Entorno de desarrollo y entrenamiento
