@@ -441,7 +441,7 @@ La aplicación también está actualmente desplegada y disponible en **Railway**
 
 ¿Quieres desplegar tu propia instancia? Hazlo desde GitHub:
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/devloop307/parkinson-detector)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/)
 
 **Repositorio alternativo en GitHub**: [devloop307/parkinson-detector](https://github.com/devloop307/parkinson-detector)
 
