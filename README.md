@@ -24,6 +24,7 @@
 - [Contribuciones](#-contribuciones)
 - [Consideraciones Médicas](#-consideraciones-médicas)
 - [Licencia](#-licencia)
+- [Información Académica](#-información-académica)
 
 ## 🔬 Descripción del Proyecto
 
@@ -257,9 +258,9 @@ callbacks = [
 
 ## 🔬 Desarrollo en Google Colab
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18W2KbdZMAz3q5c0Y3wW1g9l0HvNMvv1-?usp=sharing)
-
 > **Accede al notebook completo de entrenamiento y desarrollo del modelo directamente en Google Colab**
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18W2KbdZMAz3q5c0Y3wW1g9l0HvNMvv1-?usp=sharing)
 
 El modelo fue desarrollado y entrenado completamente en **Google Colab**, aprovechando:
 
@@ -366,7 +367,7 @@ COPY . .                       # Copiar archivos del proyecto
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requisitos.txt  # Instalar dependencias
 EXPOSE 5000                    # Puerto de la aplicación
-CMD ["python", "aplicacion.py"]  # Comando de inicio
+CMD ["python", "app.py"]  # Comando de inicio
 ```
 
 ### Comandos Docker
@@ -420,27 +421,36 @@ git clone https://github.com/usuario/proyecto-parkinson.git
 
 # 4. Instalar dependencias Python
 pip3 install -r requisitos.txt
-
-# 5. Ejecutar la aplicación
-python3 app.py
 ```
 
 ### Plataformas de Despliegue Alternativas
 
+- **Railway**: Despliegue simplificado desde GitHub con CI/CD automático
 - **Heroku**: Despliegue gratuito con Git
 - **Google Cloud Run**: Serverless containers
 - **Azure Container Instances**: Contenedores en la nube
 - **DigitalOcean**: VPS económicos
 
-### Variables de Entorno
+### 🚀 Aplicación Desplegada
 
-```bash
-export FLASK_ENV=production
-export FLASK_APP=aplicacion.py
-export PORT=5000
-```
+La aplicación también está actualmente desplegada y disponible en **Railway**:
 
-### 🌍 **Aplicación Desplegada**: [URL disponible tras despliegue en EC2]
+**🌐 Demo en vivo**: [https://web-production-1eaa5.up.railway.app/](https://web-production-1eaa5.up.railway.app/)
+
+### 🔧 Despliegue Rápido en Railway
+
+¿Quieres desplegar tu propia instancia? Hazlo desde GitHub:
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/devloop307/parkinson-detector)
+
+**Repositorio alternativo en GitHub**: [devloop307/parkinson-detector](https://github.com/devloop307/parkinson-detector)
+
+**Pasos para desplegar desde GitHub**:
+
+1. **Fork** este repositorio en tu cuenta de GitHub
+2. **Conecta** tu repositorio con Railway
+3. **Configura** las variables de entorno necesarias
+4. **Despliega** automáticamente con cada push
 
 ## 🤝 Contribuciones
 
