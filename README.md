@@ -207,6 +207,8 @@ El modelo `modelov6.h5` implementa una **Red Neuronal Convolucional basada en Tr
 
 **Fuente de Datos**: Kaggle - "Handwritten Parkinson's Disease Augmented Data"
 
+[![Kaggle Dataset](https://img.shields.io/badge/Kaggle-20BEFF?style=for-the-badge&logo=Kaggle&logoColor=white)](https://www.kaggle.com/datasets/banilkumar20phd7071/handwritten-parkinsons-disease-augmented-data)
+
 **División del Dataset**:
 - **Entrenamiento**: 70% de las imágenes
 - **Validación**: 15% de las imágenes  
@@ -525,7 +527,7 @@ Este proyecto es un trabajo académico desarrollado en la **Universidad Privada 
 |------------|--------|
 | **ALCÁNTARA RODRÍGUEZ, PIERO ARTURO** | 000268459 |
 | **AREVALO ESPINOZA, RAMDHUM** | - |
-| **BAUTISTA REYES, LOURDES YOLANDA** | - |
+| **BAUTISTA REYES, LOURDES YOLANDA** | 000267781 |
 | **DAVALOS ALFARO, MARISELLA LISSET** | - |
 | **LEYVA VALQUI, GABRIEL ADOLFO** | 000262610 |
 | **RODRIGUEZ GONZALES, ALEJANDRO VALENTINO** | 000267222 |
