@@ -20,6 +20,7 @@
 - [Modelo de Aprendizaje Automático](#-modelo-de-aprendizaje-automático)
 - [Desarrollo en Google Colab](#-desarrollo-en-google-colab)
 - [Dockerización](#-dockerización)
+- [Metodología de Desarrollo](#-metodología-de-desarrollo)
 - [Despliegue](#-despliegue)
 - [Contribuciones](#-contribuciones)
 - [Consideraciones Médicas](#-consideraciones-médicas)
@@ -359,6 +360,44 @@ drive.mount('/content/drive')
 - **Formato**: Imágenes RGB de trazos de espirales y ondas
 - **Preprocesamiento**: Normalización, redimensionamiento, augmentación
 
+## 📋 Metodología de Desarrollo
+
+### SCRUM - Metodología Ágil
+
+[![SCRUM](https://img.shields.io/badge/Methodology-SCRUM-blue?style=for-the-badge&logo=scrumalliance&logoColor=white)]()
+
+Este proyecto fue desarrollado utilizando la metodología **SCRUM** en una **iteración única**, implementando las siguientes prácticas ágiles:
+
+#### 🔄 **Sprint Único de Desarrollo**
+Desarrollo completo del sistema en un sprint académico con las siguientes fases:
+- **Investigación y análisis** del problema de detección de Parkinson
+- **Recolección y preprocesamiento** del dataset de Kaggle
+- **Desarrollo y entrenamiento** del modelo de machine learning
+- **Implementación** de la aplicación web Flask
+- **Testing y despliegue** en AWS EC2 y Railway
+
+#### 👥 **Roles del Equipo**
+- **Product Owner**: Definición de requisitos y objetivos académicos
+- **Scrum Master**: Coordinación del equipo y gestión de tiempos
+- **Development Team**: Desarrollo técnico colaborativo
+
+#### 📊 **Artefactos SCRUM**
+- **Product Backlog**: Lista de funcionalidades del sistema de detección
+- **Sprint Backlog**: Tareas distribuidas entre el equipo
+- **Increment**: Sistema completo y funcional desplegado
+
+#### 🎯 **Ceremonias Adaptadas**
+- **Sprint Planning**: Planificación inicial del proyecto
+- **Daily Standups**: Coordinación diaria del equipo
+- **Sprint Review**: Presentación del sistema final
+- **Sprint Retrospective**: Evaluación del proceso de desarrollo
+
+#### ✅ **Beneficios en Desarrollo Académico**
+- **Organización**: Distribución clara de responsabilidades
+- **Colaboración**: Trabajo en equipo efectivo
+- **Calidad**: Revisión continua entre compañeros
+- **Entrega**: Sistema funcional dentro del plazo académico
+
 ## 🐳 Dockerización
 
 ### Dockerfile Explicado
@@ -393,7 +432,7 @@ docker logs <container_id>
 
 ### Despliegue en AWS EC2
 
-[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](http://3.145.174.173:5000/)
+[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/es/free/?trk=8fa18207-f2c2-4587-81a1-f2a3648571b3&sc_channel=ps&ef_id=Cj0KCQjw1JjDBhDjARIsABlM2Su-ymA3KNMiuKRRlfUF5X3Bb_ZDU4v3MXYQjMyD18GyFz0qNddt0KAaAsHyEALw_wcB:G:s&s_kwcid=AL!4422!3!647999789205!e!!g!!aws!19685287144!146461596896&gad_campaignid=19685287144&gbraid=0AAAAADjHtp_coLpUyTR4aBWQ5YwLsWbn-&gclid=Cj0KCQjw1JjDBhDjARIsABlM2Su-ymA3KNMiuKRRlfUF5X3Bb_ZDU4v3MXYQjMyD18GyFz0qNddt0KAaAsHyEALw_wcB&all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all)
 
 La aplicación está desplegada en **Amazon Web Services EC2**, proporcionando:
 
