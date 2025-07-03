@@ -364,7 +364,7 @@ drive.mount('/content/drive')
 
 ### SCRUM - Metodología Ágil
 
-[![SCRUM](https://img.shields.io/badge/Methodology-SCRUM-blue?style=for-the-badge&logo=scrumalliance&logoColor=white)]()
+[![SCRUM](https://img.shields.io/badge/Methodology-SCRUM-blue?style=for-the-badge&logo=scrumalliance&logoColor=white)](https://asana.com/es/resources/what-is-scrum)
 
 Este proyecto fue desarrollado utilizando la metodología **SCRUM** en una **iteración única**, implementando las siguientes prácticas ágiles:
 
