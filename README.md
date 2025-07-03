@@ -393,7 +393,11 @@ docker logs <container_id>
 
 ### Despliegue en AWS EC2
 
+[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](http://3.145.174.173:5000/)
+
 La aplicación está desplegada en **Amazon Web Services EC2**, proporcionando:
+
+**🌍 Aplicación Principal**: [http://3.145.174.173:5000/](http://3.145.174.173:5000/)
 
 - **Alta disponibilidad**: Instancia EC2 con uptime garantizado
 - **Escalabilidad**: Capacidad de escalar recursos según demanda  
