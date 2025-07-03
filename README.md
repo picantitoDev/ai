@@ -477,7 +477,7 @@ pip3 install -r requirements.txt
 - **Azure Container Instances**: Contenedores en la nube
 - **DigitalOcean**: VPS económicos
 
-### 🚀 Aplicación Desplegada
+### 🚀 Aplicación Desplegada(alternativa)
 
 La aplicación también está actualmente desplegada y disponible en **Railway**:
 
