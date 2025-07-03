@@ -96,7 +96,7 @@ source venv/bin/activate  # En Windows: venv\Scripts\activate
 3. **Instalar dependencias**
 ```bash
 pip install --upgrade pip
-pip install -r requisitos.txt
+pip install -r requirements.txt
 ```
 
 4. **Crear directorios necesarios**
@@ -156,7 +156,7 @@ proyecto-parkinson/
 ├── 📄 README.md                 # Documentación principal
 ├── 🐍 app.py             # Aplicación Flask principal
 ├── 🧠 modelov6.h5              # Modelo entrenado de TensorFlow
-├── 📋 requisitos.txt           # Dependencias de Python
+├── 📋 requirements.txt           # Dependencias de Python
 ├── 🐳 Dockerfile               # Configuración de contenedor
 ├── 🚫 .gitignore               # Archivos ignorados por Git
 ├── 📁 plantillas/              # Templates HTML
@@ -368,7 +368,7 @@ FROM python:3.10-slim          # Imagen base ligera
 WORKDIR /app                   # Directorio de trabajo
 COPY . .                       # Copiar archivos del proyecto
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requisitos.txt  # Instalar dependencias
+    && pip install --no-cache-dir -r requirements.txt  # Instalar dependencias
 EXPOSE 5000                    # Puerto de la aplicación
 CMD ["python", "app.py"]  # Comando de inicio
 ```
@@ -423,7 +423,7 @@ sudo apt update && sudo apt install python3-pip
 git clone https://github.com/usuario/proyecto-parkinson.git
 
 # 4. Instalar dependencias Python
-pip3 install -r requisitos.txt
+pip3 install -r requirements.txt
 ```
 
 ### Plataformas de Despliegue Alternativas
